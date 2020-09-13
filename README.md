@@ -7,7 +7,7 @@
 * [Data](#data)
 * [Algorithms](#algorithms)
 * [Data Pre-processing](#data-pre-processing)
-* [Exploratory Data Analysis](#exploratory-data-analysis)
+* [ExploratoryData Analysis](#exploratory-data-analysis)
 * [Approach](#approach)
 * [Evaluation Metrics](#evaluation-metrics)
 * [Results](#results)
