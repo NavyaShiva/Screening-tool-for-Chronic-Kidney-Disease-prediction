@@ -2,7 +2,7 @@
 
 ### Table of contents
 * [Introduction](#introduction)
-* [Problem statement] (#problem-statement)
+* [Problemstatement] (#problem-statement)
 * [Technologies](#technologies)
 * [Data](#data)
 * [Algorithms](#algorithms)
