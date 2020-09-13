@@ -6,8 +6,8 @@
 * [Technologies](#technologies)
 * [Data](#data)
 * [Algorithms](#algorithms)
-* [Data Pre-processing] (#Data-Pre-processing)
-* [Exploratory Data Analysis] (#Exploratory-Data-Analysis)
+* [Data Pre-processing] (#data-pre-processing)
+* [Exploratory Data Analysis] (#exploratory-data-analysis)
 * [Approach](#approach)
 * [Evaluation Metrics](#evaluation-metrics)
 * [Results](#results)
@@ -55,7 +55,7 @@
 * By using 'vif' (variance inflation factor), removed the multi-collinearity among the predictors and found the variables that needs to be included in the final model.
 * Built Logistic regression model on the training data
 
-### Evaluation metrics
+### Evaluation Metrics
 * It is important that we predict the True positive so instead of measuring accuracy, I am using Recall as the evaluation metric so we can reduce the 'false negative'. 
 
 ### Results 
