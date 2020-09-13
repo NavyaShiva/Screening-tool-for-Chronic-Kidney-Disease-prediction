@@ -1,0 +1,385 @@
+---
+title: "Chronic Kidney Disease Analysis"
+output: word_document
+---
+
+
+Loading the libraries  
+
+tidyverse for easy data manipulation and visualization
+caret for easy machine learning workflow
+```{r}
+library(readxl)
+library(caTools)
+library(ROCR)
+library(tidyverse)
+library(caret)
+library(openxlsx)
+
+```
+
+
+Reading the dataset
+
+Dataset description: 
+
+The dataset was obtained from Darden Business Publishing - University of Virginia.  
+Target variable - CKD
+Predictors      - 32
+Type of data    - Rows and column data
+Dataset consists of 32 predictors, which consists of 10 continuous variables, and 22 categorical variables. 
+```{r}
+dataset <- read_excel("D:/UIC Spring 2020/Healthcare Analytics/Chronic Kidney Disease/Chronic Kidney Disease Dataset.xls", sheet = "All Data")
+
+```
+
+
+setting the seed to a number so we train on same data everytime
+```{r}
+set.seed(12345)
+```
+
+description of the data
+```{r}
+attach(dataset)
+str(dataset)
+```
+
+
+creating empty category variable
+```{r}
+cat.ind <- c()
+```
+
+
+factorizing the categorical variables
+```{r}
+n <- 0
+#converting num to factors
+for (i in 1:ncol(dataset)){
+  dataset[[i]]=as.factor(dataset[[i]])
+  if (length(levels(dataset[[i]]))>=5){
+    dataset[[i]]=as.numeric(dataset[[i]]) 
+  }
+  if (is.factor(dataset[[i]])){
+    n <- n + 1
+    cat.ind[n] <- i
+  }
+}
+```
+
+
+CKD has 'NA' which needs to be predicted. Storing those rows seperately. 
+'grep' function gives us the index of a column. 
+```{r}
+test.ind=which(is.na(dataset$CKD))
+data.test=dataset[test.ind,]
+p=grep("CKD",colnames(data.test))
+```
+
+
+removing the CKD column in the test data
+```{r}
+data.test_without=data.test[,-p]
+```
+
+
+removing all the rows that have N/A in any of the columns to avoid injecting any artificial imputation in the test dataset
+```{r}
+for (i in 1:ncol(data.test_without)){
+  if (sum(is.na(data.test_without[[i]]))!=0){
+    a=which(is.na(data.test_without[[i]]))
+    data.test_without=data.test_without[-a,]
+  }
+}
+```
+
+
+training dataset after removing the N/A rows in the target variable 'CKD'
+```{r}
+b=grep("CKD",colnames(dataset))
+dataset=dataset[-test.ind,]
+```
+
+
+removing all the rows that have any missing values from the training data
+```{r}
+for (i in 1:ncol(dataset)){
+  if (sum(is.na(dataset[[i]]))!=0){
+    a=which(is.na(dataset[[i]]))
+    dataset=dataset[-a,]
+  }
+}
+```
+
+
+seperating the training data into categorical variables and continuous variables
+```{r}
+cat.df <- dataset[,cat.ind]
+cat.num<-dataset[,-cat.ind]
+
+```
+
+
+checking if there are any rows which are NA
+```{r}
+na_dataset=lapply(dataset,function(x) {length(which(is.na(x)))})
+
+unlist(na_dataset)
+
+```
+
+
+splitting the dataset into train and test
+```{r}
+data.train=dataset[-test.ind,]
+```
+
+
+checked for independance of the unmarried variable by chi-square
+The p value came to be less than 0.1, so we include this variable as it is significant, but since it doesnt make sense in the context removed
+
+
+By researching further, it is known that having low HDL and high LDL, is bad, and since Total Chol is sum of HDL, LDL, and 20% of total glycerides, I chose to remove the Total chol, because there is high correlation
+```{r}
+plot(HDL,LDL)
+plot(`Total Chol`,LDL)
+plot(`Total Chol`,HDL)
+cor(dataset$LDL,dataset$`Total Chol`)
+cor(dataset$HDL,dataset$`Total Chol`)
+
+```
+
+
+scaling the data of HDL and Total Chol and plotting gave the same plot
+```{r}
+dat <- data.frame(HDL,`Total Chol`)
+scaled.dat <- scale(dat)
+colnames(scaled.dat)
+```
+
+
+Significance Test-
+Chi-Square test: 
+
+#checking the significance of the column "Dyslipidemia"
+```{r}
+
+chi.Dyslipidemia=table(data.train$Dyslipidemia,data.train$CKD)
+print(chi.Dyslipidemia)
+print(chisq.test(chi.Dyslipidemia))
+```
+
+#checking the significance of the column "PoorVision"
+```{r}
+chi.Poorvision=table(dataset$PoorVision,dataset$CKD)
+print(chi.Poorvision)
+print(chisq.test(chi.Poorvision))
+```
+
+#chi square between Female and CKD
+```{r}
+chi.female = table(Female,CKD)
+print(chi.female)
+print(chisq.test(chi.female))
+```
+
+
+Checking for correlation-
+
+#correlation with the SBP and DBP
+```{r}
+cor(dataset$SBP,dataset$DBP)
+```
+
+
+#checking correlation between Fam CVD and CVD
+```{r}
+chi.FamCVD=table(dataset$`Fam CVD`,dataset$CVD)
+print(chi.FamCVD)
+print(chisq.test(chi.FamCVD))
+```
+
+
+#checking correlation between Fam Diabetes and Diabetes
+```{r}
+chi.Diabetes=table(dataset$Diabetes,dataset$`Fam Diabetes`)
+print(chi.Diabetes)
+print(chisq.test(chi.Diabetes))
+```
+
+
+#checking correlation between Hypertension and Fam Hypertension
+```{r}
+chi.Hypertension = table(Hypertension,`Fam Hypertension`)
+print(chi.Hypertension)
+print(chisq.test(chi.Hypertension))
+```
+
+#checking correlation between education and CKD
+```{r}
+chi.edu=table(dataset$Educ,dataset$CKD)
+print(chi.edu)
+print(chisq.test(chi.edu))
+```
+
+#checking correlation between race and CKD
+```{r}
+chi.race=table(dataset$Racegrp,dataset$CKD)
+print(chi.race)
+print(chisq.test(chi.race))
+```
+
+#checking correlation between caresouce and CKD
+```{r}
+chi.care=table(dataset$CareSource,dataset$CKD)
+print(chi.care)
+print(chisq.test(chi.care))
+```
+
+#checking correlation between Insured and CKD
+```{r}
+chi.insurance=table(dataset$Insured,dataset$CKD)
+print(chi.insurance)
+print(chisq.test(chi.insurance))
+```
+
+#checking correlation between PVD and CKD
+```{r}
+chi.pvd=table(dataset$PVD,dataset$CKD)
+print(chi.pvd)
+print(chisq.test(chi.pvd))
+```
+
+#checking correlation between activity and CKD
+```{r}
+chi.activity=table(dataset$Activity,dataset$CKD)
+print(chi.activity)
+print(chisq.test(chi.activity))
+
+```
+
+#checking correlation between smoker and CKD
+```{r}
+chi.smoker=table(dataset$Smoker,dataset$CKD)
+print(chi.smoker)
+print(chisq.test(chi.smoker))
+```
+
+
+```{r}
+str(dataset)
+```
+
+
+t-test for continuous variable
+```{r}
+t.test(dataset$SBP~dataset$CKD)
+t.test(dataset$DBP~dataset$CKD)
+t.test(dataset$HDL~dataset$CKD)
+t.test(dataset$LDL~dataset$CKD)
+
+```
+
+removing the columns that were not found significant with the target variable
+```{r}
+grep("Income",colnames(dataset))
+grep("ID",colnames(dataset))
+grep("Unmarried",colnames(dataset))
+grep("Weight",colnames(dataset))
+grep("Height",colnames(dataset))
+grep("BMI",colnames(dataset))
+grep("Total Chol",colnames(dataset))
+grep("Dyslipidemia",colnames(dataset))
+grep("PoorVision",colnames(dataset))
+grep("Waist",colnames(dataset))
+grep("Educ",colnames(dataset))
+grep("CareSource",colnames(dataset))
+
+```
+
+
+```{r}
+#col index of the dataset which are not needed
+col=c(7,1,5,6,8,10,11,12,14,19,20,23)
+
+dataset=dataset[,-col]
+```
+
+since we want to check for the recall, I split the data into train and test after removing the N/A's from the
+target variable 'CKD'
+```{r}
+require(caTools)
+set.seed(123)
+
+sample <-sample.split(dataset, SplitRatio = 0.75)
+data.train1 <-subset(dataset, sample ==TRUE)
+data.test1 <- subset(dataset, sample ==FALSE)
+
+```
+
+
+keeping the variables that are significant and after removing multi-collinearity. 
+```{r}
+keeps <- c("Age", "Female", "Racegrp","HDL","LDL","PVD","Hypertension","Diabetes","CHF","CKD")
+data.train1 <- data.train1[keeps]
+data.test1 <- data.test1[keeps]
+```
+
+
+Building the Logistic Regression model
+```{r}
+log.model = glm( data.train1$CKD ~ .,family = binomial,data = data.train1)
+```
+
+
+summary of the logistric regression model 
+```{r}
+summary(log.model)
+```
+
+
+For the better interpretation, we are finding the odds ratio below
+```{r}
+exp(coefficients(log.model))
+```
+
+
+predicting the results on the test data.
+Using a threshold value to classify the target variable if a person has chronic kidney disease or not so we can 
+have less false negatives in the prediction. I focused on getting better recall for this reason
+```{r}
+# Predicting the Test set results
+prob_pred = predict(log.model, type = 'response', newdata = data.test1)
+y_pred = ifelse(prob_pred > 0.01,1, 0)
+
+```
+
+
+Making the Confusion Matrix to get the recall value for the prediction
+#Recall = tp/(tp+fn)
+```{r}
+cm = table(data.test1$CKD, y_pred > 0.01)
+cm
+hist(prob_pred)
+table(data.test1$CKD)
+cm[3]
+Recall = cm[4]/(cm[4]+cm[2])
+print(Recall)
+```
+
+
+Recall-Precision curve   
+```{r}
+RP.perf <- performance(pred, "prec", "rec")
+```
+
+
+Saving the RDS file to load in RShiny for the screening tool
+```{r}
+saveRDS(log.model, file = "D:/UIC Spring 2020/Healthcare Analytics/Chronic Kidney Disease/CKD_v2.rds")
+write.xlsx(data.test1, 'D:/UIC Spring 2020/Healthcare Analytics/Chronic Kidney Disease/testdata_CKD_v2.xlsx')
+data.frame(min=sapply(cat.num,min),max=sapply(cat.num,max))
+
+```
+
