@@ -2,18 +2,16 @@
 
 ### Table of contents
 * [Introduction](#introduction)
-* [Problemstatement] (#problemstatement)
+* [Problem Statement](#problem-statement)
 * [Technologies](#technologies)
 * [Data](#data)
 * [Algorithms](#algorithms)
- - Models used, describe in detail
-* [Data Pre-processing] (#Data Pre-processing)
-* [Exploratory Data Analysis] (#Exploratory Data Analysis)
+* [Data Pre-processing] (#Data-Pre-processing)
+* [Exploratory Data Analysis] (#Exploratory-Data-Analysis)
 * [Approach](#approach)
-* [Evaluation Metrics](#evaluation metrics)
+* [Evaluation Metrics](#evaluation-metrics)
 * [Results](#results)
 * [Conclusion](#conclusion)
-* [References](#references)
 
 
 
