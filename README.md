@@ -18,7 +18,7 @@
 ### Introduction
 * Chronic Kideny Disease (CKD) is a progressive condition that results in significant morbidity and mortality. Because of the important role the kidneys play in maintaining homeostasis, CKD can affect almost every body system. Early recognition and intervention are essential to slowing disease progression. 
 
-### Problemstatement
+### Problem Statement
 * The purpose of this case is to create an easy-to-use screening tool to identify patients at risk for CKD for the doctor to identify at early stage, so that the patients with a   high enough probability of having CKD can be tested. 
 
 ### Data Source
