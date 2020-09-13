@@ -44,7 +44,7 @@
 * Predictors     :  32
 * Dataset consists of 32 predictors, which consists of 10 continuous variables, and 22 categorical variables.
 * The variables description: 
-![alt text](/pics/Variable_desc.png)
+![alt text](Variable_desc.png)
 
 ### Algorithms
 * Logistic Regression
