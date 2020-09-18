@@ -1,5 +1,5 @@
 ## Chronic Kidney Disease prediction
-![alt text](EMR.png)
+![alt text](EMRnew.jpg)
 
 ### Table of contents
 * [Introduction](#introduction)
